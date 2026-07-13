@@ -1,0 +1,16 @@
+.logs-page {
+  animation: fadeIn 300ms ease;
+}
+
+.log-action {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+}
+
+.log-hwid {
+  max-width: 120px;
+  display: inline-block;
+}
