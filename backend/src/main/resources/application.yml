@@ -1,0 +1,36 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: keyvault
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/keyvault}
+      database: keyvault
+
+# JWT Configuration
+app:
+  jwt:
+    secret: ${JWT_SECRET:your-256-bit-secret-key-change-this-in-production-please}
+    access-token-expiration-ms: 3600000       # 1 hour
+    refresh-token-expiration-ms: 604800000    # 7 days
+
+  # Key Generation
+  key-format: "XXXXX-XXXXX-XXXXX-XXXXX"
+  key-charset: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+  # CORS
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
+
+  # Geo-IP enrichment (free endpoint: 1,000 lookups/day; results cached in-process)
+  geo-ip:
+    enabled: ${GEO_IP_ENABLED:true}
+    # Resolves this machine's outward-facing IP when requests arrive from localhost.
+    # Disable in production and configure your proxy to forward the real client IP.
+    local-fallback-enabled: ${GEO_IP_LOCAL_FALLBACK:true}
+    base-url: ${GEO_IP_BASE_URL:https://ipwho.is/}
+
+  # Scheduler
+  key-expiry-check-cron: "0 0 * * * *"  # Every hour
