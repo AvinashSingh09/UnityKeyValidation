@@ -400,9 +400,6 @@ public static string GenerateFingerprint()
         ) : (
           <div className="geo-grid">
             <div className="geo-chart">
-              <div className="geo-map-badge">
-                <span className="geo-live-dot" /> Live installation map
-              </div>
               <GeoMap locations={geography.locations} />
             </div>
 

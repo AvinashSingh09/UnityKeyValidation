@@ -629,6 +629,23 @@
 /* ---------- Integration Guide Modal ---------- */
 .modal-large {
   max-width: 840px !important;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-large .modal-header,
+.modal-large .guide-tabs,
+.modal-large .modal-footer {
+  flex-shrink: 0;
+}
+
+.modal-large .guide-content {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+  scrollbar-gutter: stable;
 }
 
 .guide-tabs {
