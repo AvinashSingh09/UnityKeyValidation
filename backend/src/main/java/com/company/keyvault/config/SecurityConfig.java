@@ -54,7 +54,7 @@ public class SecurityConfig {
                         // Public endpoints — no JWT required
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/validate/**").permitAll()
-                        .requestMatchers("/api/health").permitAll()
+                        .requestMatchers("/", "/api/health").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Admin endpoints — JWT required
                         .requestMatchers("/api/products/**").authenticated()

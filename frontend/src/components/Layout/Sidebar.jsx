@@ -26,13 +26,11 @@ export default function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
-        <div className="sidebar-logo">
-          <HiOutlineKey />
-        </div>
-        <div>
-          <h2>KeyVault</h2>
-          <span>License Manager</span>
-        </div>
+        <img
+          className="sidebar-brand-logo"
+          src="/360 logo.png"
+          alt="360 Bright Media"
+        />
       </div>
 
       <nav className="sidebar-nav">

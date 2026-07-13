@@ -20,7 +20,7 @@ public class HealthController {
         this.mongoTemplate = mongoTemplate;
     }
 
-    @GetMapping("/api/health")
+    @GetMapping({"/", "/api/health"})
     public ResponseEntity<Map<String, Object>> checkHealth() {
         Map<String, Object> health = new HashMap<>();
         health.put("status", "UP");
@@ -39,7 +39,6 @@ public class HealthController {
             }
         } catch (Exception e) {
             health.put("database", "DOWN");
-            health.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(health);
         }
     }

@@ -75,6 +75,14 @@
   margin-bottom: var(--space-xl);
 }
 
+.login-brand-logo {
+  display: block;
+  width: min(100%, 280px);
+  height: 140px;
+  margin: 0 auto 8px;
+  object-fit: contain;
+}
+
 .login-logo-icon {
   display: inline-flex;
   align-items: center;

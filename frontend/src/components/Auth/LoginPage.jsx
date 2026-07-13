@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { forgotPassword, getSetupStatus, login, register } from '../../api/authApi';
 import toast from 'react-hot-toast';
-import { HiOutlineKey, HiOutlineShieldCheck } from 'react-icons/hi2';
+import { HiOutlineShieldCheck } from 'react-icons/hi2';
 import './Login.css';
 
 export default function LoginPage() {
@@ -56,10 +56,11 @@ export default function LoginPage() {
 
       <div className="login-card">
         <div className="login-logo">
-          <div className="login-logo-icon">
-            <HiOutlineKey />
-          </div>
-          <h1>KeyVault</h1>
+          <img
+            className="login-brand-logo"
+            src="/360 logo.png"
+            alt="360 Bright Media"
+          />
           <p>Unity License Management Platform</p>
         </div>
 
