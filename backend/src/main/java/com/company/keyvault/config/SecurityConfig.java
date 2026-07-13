@@ -1,8 +1,11 @@
 package com.company.keyvault.config;
 
 import com.company.keyvault.security.JwtAuthenticationFilter;
+import com.company.keyvault.security.RateLimitFilter;
+import com.company.keyvault.security.AuditLogFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -20,12 +23,17 @@ import jakarta.servlet.http.HttpServletResponse;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@EnableAsync
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RateLimitFilter rateLimitFilter;
+    private final AuditLogFilter auditLogFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, RateLimitFilter rateLimitFilter, AuditLogFilter auditLogFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.rateLimitFilter = rateLimitFilter;
+        this.auditLogFilter = auditLogFilter;
     }
 
     @Bean
@@ -46,6 +54,7 @@ public class SecurityConfig {
                         // Public endpoints — no JWT required
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/validate/**").permitAll()
+                        .requestMatchers("/api/health").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Admin endpoints — JWT required
                         .requestMatchers("/api/products/**").authenticated()
@@ -54,7 +63,9 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter,
-                        UsernamePasswordAuthenticationFilter.class);
+                        UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(rateLimitFilter, JwtAuthenticationFilter.class)
+                .addFilterAfter(auditLogFilter, JwtAuthenticationFilter.class);
 
         return http.build();
     }

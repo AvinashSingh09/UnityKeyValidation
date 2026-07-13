@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { login, register } from '../../api/authApi';
+import { forgotPassword, getSetupStatus, login, register } from '../../api/authApi';
 import toast from 'react-hot-toast';
 import { HiOutlineKey, HiOutlineShieldCheck } from 'react-icons/hi2';
 import './Login.css';
 
 export default function LoginPage() {
   const [isRegister, setIsRegister] = useState(false);
+  const [isForgot, setIsForgot] = useState(false);
+  const [setupRequired, setSetupRequired] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -15,10 +17,18 @@ export default function LoginPage() {
   const { loginUser } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => { getSetupStatus().then(({ data }) => setSetupRequired(data.setupRequired)).catch(() => {}); }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
+      if (isForgot) {
+        await forgotPassword(email);
+        toast.success('If that account exists, a reset link has been sent.');
+        setIsForgot(false);
+        return;
+      }
       let response;
       if (isRegister) {
         response = await register(fullName, email, password);
@@ -54,7 +64,7 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
-          {isRegister && (
+          {isRegister && !isForgot && (
             <div className="input-group">
               <label htmlFor="fullName">Full Name</label>
               <input
@@ -82,7 +92,7 @@ export default function LoginPage() {
             />
           </div>
 
-          <div className="input-group">
+          {!isForgot && <div className="input-group">
             <label htmlFor="password">Password</label>
             <input
               id="password"
@@ -92,9 +102,11 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={8}
+              minLength={isRegister ? 10 : 8}
             />
-          </div>
+          </div>}
+
+          {!isRegister && !isForgot && <button type="button" className="login-forgot" onClick={() => setIsForgot(true)}>Forgot password?</button>}
 
           <button type="submit" className="btn btn-primary login-btn" disabled={loading}>
             {loading ? (
@@ -102,17 +114,17 @@ export default function LoginPage() {
             ) : (
               <>
                 <HiOutlineShieldCheck />
-                {isRegister ? 'Create Account' : 'Sign In'}
+                {isForgot ? 'Send Reset Link' : isRegister ? 'Create Account' : 'Sign In'}
               </>
             )}
           </button>
         </form>
 
         <div className="login-toggle">
-          <span>{isRegister ? 'Already have an account?' : "Don't have an account?"}</span>
-          <button onClick={() => setIsRegister(!isRegister)} className="btn btn-ghost btn-sm">
-            {isRegister ? 'Sign In' : 'Register'}
-          </button>
+          {isForgot ? <><span>Remembered your password?</span><button onClick={() => setIsForgot(false)} className="btn btn-ghost btn-sm">Sign In</button></>
+            : isRegister ? <><span>Already have an account?</span><button onClick={() => setIsRegister(false)} className="btn btn-ghost btn-sm">Sign In</button></>
+            : setupRequired ? <><span>First-time setup?</span><button onClick={() => setIsRegister(true)} className="btn btn-ghost btn-sm">Create Owner Account</button></>
+            : <span>Accounts are created by your KeyVault administrator.</span>}
         </div>
       </div>
     </div>

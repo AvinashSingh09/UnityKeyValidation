@@ -1,6 +1,5 @@
 package com.company.keyvault.dto.request;
 
-import com.company.keyvault.model.enums.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -24,5 +23,4 @@ public class RegisterRequest {
     @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
 
-    private UserRole role;
 }

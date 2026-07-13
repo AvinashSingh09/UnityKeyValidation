@@ -33,5 +33,10 @@ app:
     local-fallback-enabled: ${GEO_IP_LOCAL_FALLBACK:true}
     base-url: ${GEO_IP_BASE_URL:https://ipwho.is/}
 
+  security:
+    password-reset-url: ${PASSWORD_RESET_URL:http://localhost:5173/reset-password}
+    mail-from: ${SECURITY_MAIL_FROM:noreply@keyvault.local}
+    expose-reset-link: ${EXPOSE_RESET_LINK:false}
+
   # Scheduler
   key-expiry-check-cron: "0 0 * * * *"  # Every hour

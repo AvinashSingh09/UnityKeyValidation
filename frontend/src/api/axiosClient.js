@@ -38,6 +38,7 @@ axiosClient.interceptors.response.use(
           });
           localStorage.setItem('accessToken', data.accessToken);
           localStorage.setItem('refreshToken', data.refreshToken);
+          localStorage.setItem('sessionId', data.sessionId || '');
           originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
           return axiosClient(originalRequest);
         }
@@ -45,6 +46,7 @@ axiosClient.interceptors.response.use(
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
+        localStorage.removeItem('sessionId');
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }

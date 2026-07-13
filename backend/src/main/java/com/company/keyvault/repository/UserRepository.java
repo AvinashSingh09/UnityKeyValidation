@@ -14,4 +14,6 @@ public interface UserRepository extends MongoRepository<User, String> {
     boolean existsByEmail(String email);
 
     boolean existsByRole(com.company.keyvault.model.enums.UserRole role);
+
+    long countByRoleAndActiveTrue(com.company.keyvault.model.enums.UserRole role);
 }

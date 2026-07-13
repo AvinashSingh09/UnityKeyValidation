@@ -12,6 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+import java.time.Instant;
+import java.util.UUID;
 
 @Component
 public class JwtTokenProvider {
@@ -32,23 +34,25 @@ public class JwtTokenProvider {
 
     public String generateAccessToken(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        return generateToken(userDetails.getUsername(), accessTokenExpirationMs);
+        return generateToken(userDetails.getUsername(), accessTokenExpirationMs, "access");
     }
 
     public String generateAccessToken(String email) {
-        return generateToken(email, accessTokenExpirationMs);
+        return generateToken(email, accessTokenExpirationMs, "access");
     }
 
     public String generateRefreshToken(String email) {
-        return generateToken(email, refreshTokenExpirationMs);
+        return generateToken(email, refreshTokenExpirationMs, "refresh");
     }
 
-    private String generateToken(String subject, long expirationMs) {
+    private String generateToken(String subject, long expirationMs, String type) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationMs);
 
         return Jwts.builder()
                 .subject(subject)
+                .id(UUID.randomUUID().toString())
+                .claim("type", type)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(key)
@@ -74,6 +78,22 @@ public class JwtTokenProvider {
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
+    }
+
+    public boolean isAccessToken(String token) {
+        return "access".equals(getClaims(token).get("type", String.class));
+    }
+
+    public boolean isRefreshToken(String token) {
+        return "refresh".equals(getClaims(token).get("type", String.class));
+    }
+
+    public Instant getExpiration(String token) {
+        return getClaims(token).getExpiration().toInstant();
+    }
+
+    private Claims getClaims(String token) {
+        return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
     }
 
     /**

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   HiOutlineArrowLeft,
@@ -11,7 +11,7 @@ import {
   HiOutlineTrash,
   HiOutlineUser,
 } from 'react-icons/hi2';
-import { getKey, removeDevice, updateDevice } from '../../api/keyApi';
+import { getKey, removeDevice, updateDevice, updateKey } from '../../api/keyApi';
 import { getLogs } from '../../api/analyticsApi';
 import { useAuth } from '../../context/AuthContext';
 import { formatDate, formatDateTime, timeRemaining } from '../../utils/dateUtils';
@@ -24,8 +24,18 @@ const statusClass = {
   SUSPENDED: 'badge-suspended',
 };
 
+const toDateTimeInput = (value) => value ? new Date(value).toISOString().slice(0, 16) : '';
+const licenseFormFrom = (license) => ({
+  customerName: license.customerName || '', customerEmail: license.customerEmail || '',
+  type: license.type || 'TIME_LIMITED', maxActivations: license.maxActivations || 1,
+  validFrom: toDateTimeInput(license.validFrom), validUntil: toDateTimeInput(license.validUntil),
+  notes: license.notes || '',
+});
+
 export default function KeyDetailPage() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const editRequested = searchParams.get('edit') === 'true';
   const { isAdmin } = useAuth();
   const [license, setLicense] = useState(null);
   const [logs, setLogs] = useState([]);
@@ -33,6 +43,8 @@ export default function KeyDetailPage() {
   const [editingDevice, setEditingDevice] = useState(null);
   const [deviceForm, setDeviceForm] = useState({ machineName: '', trusted: false });
   const [saving, setSaving] = useState(false);
+  const [editingLicense, setEditingLicense] = useState(false);
+  const [licenseForm, setLicenseForm] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -43,6 +55,10 @@ export default function KeyDetailPage() {
           getLogs({ keyId: id, page: 0, size: 20 }),
         ]);
         setLicense(keyResponse.data);
+        if (editRequested) {
+          setLicenseForm(licenseFormFrom(keyResponse.data));
+          setEditingLicense(true);
+        }
         setLogs(logResponse.data.content || []);
       } catch (error) {
         toast.error(error.response?.data?.message || 'Failed to load license details');
@@ -51,7 +67,7 @@ export default function KeyDetailPage() {
       }
     };
     load();
-  }, [id]);
+  }, [id, editRequested]);
 
   const devices = useMemo(() => {
     return [...(license?.activations || [])].sort((a, b) =>
@@ -61,6 +77,32 @@ export default function KeyDetailPage() {
   const openDeviceEditor = (device) => {
     setEditingDevice(device);
     setDeviceForm({ machineName: device.machineName || '', trusted: Boolean(device.trusted) });
+  };
+
+  const openLicenseEditor = () => {
+    setLicenseForm(licenseFormFrom(license));
+    setEditingLicense(true);
+  };
+
+  const saveLicense = async (event) => {
+    event.preventDefault();
+    setSaving(true);
+    try {
+      const payload = {
+        ...licenseForm,
+        maxActivations: Number(licenseForm.maxActivations),
+        validFrom: new Date(licenseForm.validFrom).toISOString(),
+        validUntil: licenseForm.type === 'PERPETUAL' ? null : new Date(licenseForm.validUntil).toISOString(),
+      };
+      const { data } = await updateKey(id, payload);
+      setLicense(data);
+      setEditingLicense(false);
+      toast.success('License details updated');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update license');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const saveDevice = async (event) => {
@@ -175,7 +217,7 @@ export default function KeyDetailPage() {
         </section>
 
         <aside className="detail-section card detail-metadata">
-          <div className="detail-section-heading"><div><h2>License details</h2><p>Configuration and ownership.</p></div></div>
+          <div className="detail-section-heading"><div><h2>License details</h2><p>Configuration and ownership.</p></div>{isAdmin() && <button className="btn btn-secondary btn-sm" onClick={openLicenseEditor}><HiOutlinePencilSquare /> Edit</button>}</div>
           <dl>
             <div><dt>Product</dt><dd>{license.productName}</dd></div>
             <div><dt>Status</dt><dd>{license.status}</dd></div>
@@ -203,6 +245,21 @@ export default function KeyDetailPage() {
           </div>
         )}
       </section>
+
+      {editingLicense && licenseForm && (
+        <div className="modal-overlay" onClick={() => setEditingLicense(false)}>
+          <div className="modal modal-large license-edit-modal" onClick={(event) => event.stopPropagation()}>
+            <div className="modal-header"><div><h2>Edit license</h2><p className="mono">{license.key}</p></div><button className="btn btn-ghost btn-icon" onClick={() => setEditingLicense(false)}>×</button></div>
+            <form onSubmit={saveLicense}>
+              <div className="form-row"><div className="input-group"><label>Customer name</label><input className="input" maxLength={160} value={licenseForm.customerName} onChange={(event) => setLicenseForm({ ...licenseForm, customerName: event.target.value })} /></div><div className="input-group"><label>Customer email</label><input className="input" type="email" value={licenseForm.customerEmail} onChange={(event) => setLicenseForm({ ...licenseForm, customerEmail: event.target.value })} /></div></div>
+              <div className="form-row mt-md"><div className="input-group"><label>License type</label><select className="select" value={licenseForm.type} onChange={(event) => setLicenseForm({ ...licenseForm, type: event.target.value })}><option value="TIME_LIMITED">Time limited</option><option value="TRIAL">Trial</option><option value="PERPETUAL">Perpetual</option></select></div><div className="input-group"><label>Maximum devices</label><input className="input" type="number" min={license.currentActivations || 1} required value={licenseForm.maxActivations} onChange={(event) => setLicenseForm({ ...licenseForm, maxActivations: event.target.value })} /><small className="form-help">Currently using {license.currentActivations} device seat(s).</small></div></div>
+              <div className="form-row mt-md"><div className="input-group"><label>Valid from</label><input className="input" type="datetime-local" required value={licenseForm.validFrom} onChange={(event) => setLicenseForm({ ...licenseForm, validFrom: event.target.value })} /></div><div className="input-group"><label>Expires</label><input className="input" type="datetime-local" required={licenseForm.type !== 'PERPETUAL'} disabled={licenseForm.type === 'PERPETUAL'} value={licenseForm.type === 'PERPETUAL' ? '' : licenseForm.validUntil} onChange={(event) => setLicenseForm({ ...licenseForm, validUntil: event.target.value })} />{licenseForm.type === 'PERPETUAL' && <small className="form-help">Perpetual licenses do not expire.</small>}</div></div>
+              <div className="input-group mt-md"><label>Internal notes</label><textarea className="input license-notes-input" maxLength={1000} rows={4} value={licenseForm.notes} onChange={(event) => setLicenseForm({ ...licenseForm, notes: event.target.value })} placeholder="Optional notes about this license" /></div>
+              <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setEditingLicense(false)}>Cancel</button><button className="btn btn-primary" disabled={saving}>{saving ? 'Saving…' : 'Save changes'}</button></div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {editingDevice && (
         <div className="modal-overlay" onClick={() => setEditingDevice(null)}>

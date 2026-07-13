@@ -13,6 +13,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.AccessDeniedException;
+import java.time.Instant;
 
 @Service
 public class AuthService {
@@ -21,75 +23,76 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
+    private final SessionService sessionService;
 
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        AuthenticationManager authenticationManager,
-                       JwtTokenProvider tokenProvider) {
+                       JwtTokenProvider tokenProvider,
+                       SessionService sessionService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
+        this.sessionService = sessionService;
     }
 
-    public AuthResponse register(RegisterRequest request) {
+    public synchronized AuthResponse register(RegisterRequest request, String ipAddress, String userAgent) {
+        if (userRepository.existsByRole(UserRole.SUPER_ADMIN)) {
+            throw new AccessDeniedException("Public registration is disabled. Ask a super admin to create your account.");
+        }
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateResourceException(
                     "User already exists with email: " + request.getEmail());
         }
 
-        // First user automatically becomes SUPER_ADMIN
-        UserRole role = request.getRole();
-        if (!userRepository.existsByRole(UserRole.SUPER_ADMIN)) {
-            role = UserRole.SUPER_ADMIN;
-        } else if (role == null) {
-            role = UserRole.VIEWER;
-        }
-
         User user = User.builder()
-                .email(request.getEmail())
+                .email(request.getEmail().toLowerCase())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getFullName())
-                .role(role)
+                .role(UserRole.SUPER_ADMIN)
+                .active(true)
+                .lastLoginAt(Instant.now())
                 .build();
 
-        userRepository.save(user);
+        user = userRepository.save(user);
 
         String accessToken = tokenProvider.generateAccessToken(user.getEmail());
-        String refreshToken = tokenProvider.generateRefreshToken(user.getEmail());
+        SessionService.IssuedSession session = sessionService.issue(user, ipAddress, userAgent);
 
-        return AuthResponse.of(accessToken, refreshToken,
+        return AuthResponse.of(accessToken, session.token(), session.sessionId(),
                 user.getEmail(), user.getFullName(), user.getRole());
     }
 
-    public AuthResponse login(LoginRequest request) {
+    public AuthResponse login(LoginRequest request, String ipAddress, String userAgent) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getEmail(), request.getPassword()));
+                        request.getEmail().toLowerCase(), request.getPassword()));
 
         String accessToken = tokenProvider.generateAccessToken(authentication);
-        String refreshToken = tokenProvider.generateRefreshToken(request.getEmail());
-
-        User user = userRepository.findByEmail(request.getEmail())
+        User user = userRepository.findByEmail(request.getEmail().toLowerCase())
                 .orElseThrow();
+        user.setLastLoginAt(Instant.now());
+        userRepository.save(user);
+        SessionService.IssuedSession session = sessionService.issue(user, ipAddress, userAgent);
 
-        return AuthResponse.of(accessToken, refreshToken,
+        return AuthResponse.of(accessToken, session.token(), session.sessionId(),
                 user.getEmail(), user.getFullName(), user.getRole());
     }
 
-    public AuthResponse refreshToken(String refreshToken) {
-        if (!tokenProvider.validateToken(refreshToken)) {
-            throw new RuntimeException("Invalid refresh token");
-        }
-
-        String email = tokenProvider.getEmailFromToken(refreshToken);
+    public AuthResponse refreshToken(String refreshToken, String ipAddress, String userAgent) {
+        SessionService.IssuedSession session = sessionService.rotate(refreshToken, ipAddress, userAgent);
+        String email = tokenProvider.getEmailFromToken(session.token());
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .filter(User::isActive)
+                .orElseThrow(() -> new org.springframework.security.authentication.BadCredentialsException("Invalid refresh token"));
 
         String newAccessToken = tokenProvider.generateAccessToken(email);
-        String newRefreshToken = tokenProvider.generateRefreshToken(email);
-
-        return AuthResponse.of(newAccessToken, newRefreshToken,
+        return AuthResponse.of(newAccessToken, session.token(), session.sessionId(),
                 user.getEmail(), user.getFullName(), user.getRole());
     }
+
+    public boolean isSetupRequired() { return !userRepository.existsByRole(UserRole.SUPER_ADMIN); }
+
+    public void logout(String refreshToken) { sessionService.revokeToken(refreshToken); }
 }

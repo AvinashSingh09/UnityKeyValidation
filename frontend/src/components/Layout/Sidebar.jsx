@@ -6,6 +6,7 @@ import {
   HiOutlineCube,
   HiOutlineDocumentText,
   HiOutlineChartBarSquare,
+  HiOutlineShieldCheck,
   HiOutlineArrowRightOnRectangle,
 } from 'react-icons/hi2';
 import './Sidebar.css';
@@ -18,6 +19,7 @@ export default function Sidebar() {
     { to: '/products', icon: <HiOutlineCube />, label: 'Products' },
     { to: '/keys', icon: <HiOutlineKey />, label: 'License Keys' },
     { to: '/analytics', icon: <HiOutlineChartBarSquare />, label: 'Analytics' },
+    { to: '/security', icon: <HiOutlineShieldCheck />, label: 'Security' },
     { to: '/logs', icon: <HiOutlineDocumentText />, label: 'Validation Logs' },
   ];
 

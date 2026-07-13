@@ -3,6 +3,7 @@ package com.company.keyvault.controller;
 import com.company.keyvault.dto.request.BatchKeyRequest;
 import com.company.keyvault.dto.request.DeviceUpdateRequest;
 import com.company.keyvault.dto.request.KeyCreateRequest;
+import com.company.keyvault.dto.request.KeyUpdateRequest;
 import com.company.keyvault.dto.response.KeyResponse;
 import com.company.keyvault.dto.response.MessageResponse;
 import com.company.keyvault.model.enums.KeyStatus;
@@ -74,7 +75,7 @@ public class LicenseKeyController {
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<KeyResponse> updateKey(
             @PathVariable String id,
-            @Valid @RequestBody KeyCreateRequest request) {
+            @Valid @RequestBody KeyUpdateRequest request) {
         return ResponseEntity.ok(keyService.updateKey(id, request));
     }
 

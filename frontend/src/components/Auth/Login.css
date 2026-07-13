@@ -110,6 +110,8 @@
   gap: var(--space-md);
 }
 
+.login-forgot { align-self: flex-end; margin-top: -4px; padding: 0; border: 0; background: transparent; color: var(--primary); cursor: pointer; font: 600 12px var(--font-family); }
+
 .login-btn {
   width: 100%;
   padding: 12px;

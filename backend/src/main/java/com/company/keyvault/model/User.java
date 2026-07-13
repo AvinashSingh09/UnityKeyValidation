@@ -33,6 +33,15 @@ public class User {
     @Builder.Default
     private UserRole role = UserRole.VIEWER;
 
+    @Builder.Default
+    private Boolean active = true;
+
+    private Instant lastLoginAt;
+
+    public boolean isActive() {
+        return active == null || active;
+    }
+
     @CreatedDate
     private Instant createdAt;
 

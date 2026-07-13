@@ -16,6 +16,7 @@ import {
   HiOutlineFunnel,
   HiOutlineSquare3Stack3D,
   HiOutlineEye,
+  HiOutlinePencilSquare,
   HiOutlineMapPin,
 } from 'react-icons/hi2';
 import './Keys.css';
@@ -268,6 +269,7 @@ export default function KeysPage() {
                     </td>
                     <td>
                       <div className="flex gap-sm">
+                        {isAdmin() && <button onClick={() => navigate(`/keys/${key.id}?edit=true`)} className="btn btn-ghost btn-icon btn-sm" title="Edit license details"><HiOutlinePencilSquare /></button>}
                         <button onClick={() => navigate(`/keys/${key.id}`)} className="btn btn-ghost btn-icon btn-sm" title="Open license details">
                           <HiOutlineEye />
                         </button>

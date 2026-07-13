@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { logout } from '../api/authApi';
 
 const AuthContext = createContext(null);
 
@@ -18,6 +19,7 @@ export function AuthProvider({ children }) {
   const loginUser = (authResponse) => {
     localStorage.setItem('accessToken', authResponse.accessToken);
     localStorage.setItem('refreshToken', authResponse.refreshToken);
+    localStorage.setItem('sessionId', authResponse.sessionId || '');
     const userData = {
       email: authResponse.email,
       fullName: authResponse.fullName,
@@ -27,10 +29,15 @@ export function AuthProvider({ children }) {
     setUser(userData);
   };
 
-  const logoutUser = () => {
+  const logoutUser = async () => {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (refreshToken) {
+      try { await logout(refreshToken); } catch { /* local sign-out must still complete */ }
+    }
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
+    localStorage.removeItem('sessionId');
     setUser(null);
   };
 

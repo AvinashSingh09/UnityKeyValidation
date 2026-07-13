@@ -63,5 +63,9 @@
 .trusted-toggle span { display: flex; flex-direction: column; }
 .trusted-toggle strong { font-size: 13px; }
 .trusted-toggle small { color: var(--text-tertiary); font-size: 11px; }
+.license-edit-modal { max-width: 760px; }
+.license-edit-modal .modal-header p { margin-top: 3px; color: var(--text-tertiary); font-size: 10px; }
+.license-notes-input { min-height: 92px; resize: vertical; line-height: 1.5; }
+.form-help { margin-top: 3px; color: var(--text-tertiary); font-size: 10px; }
 @media (max-width: 1050px) { .detail-stats { grid-template-columns: 1fr 1fr; } .detail-grid { grid-template-columns: 1fr; } }
 @media (max-width: 700px) { .detail-hero { align-items: flex-start; flex-direction: column; } .detail-customer { width: 100%; padding: 14px 0 0; border-top: 1px solid var(--border); border-left: 0; } .detail-stats { grid-template-columns: 1fr; } .device-card-top { flex-direction: column; } .device-facts { grid-template-columns: 1fr 1fr; margin-left: 0; } .device-hardware { margin-left: 0; } }

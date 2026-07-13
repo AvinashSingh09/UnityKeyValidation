@@ -3,6 +3,7 @@ package com.company.keyvault.service;
 import com.company.keyvault.dto.request.BatchKeyRequest;
 import com.company.keyvault.dto.request.DeviceUpdateRequest;
 import com.company.keyvault.dto.request.KeyCreateRequest;
+import com.company.keyvault.dto.request.KeyUpdateRequest;
 import com.company.keyvault.dto.response.KeyResponse;
 import com.company.keyvault.exception.ResourceNotFoundException;
 import com.company.keyvault.model.Activation;
@@ -123,18 +124,39 @@ public class LicenseKeyService {
         return results;
     }
 
-    public KeyResponse updateKey(String id, KeyCreateRequest request) {
+    public KeyResponse updateKey(String id, KeyUpdateRequest request) {
         LicenseKey key = keyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "License key not found with id: " + id));
 
-        if (request.getCustomerName() != null) key.setCustomerName(request.getCustomerName());
-        if (request.getCustomerEmail() != null) key.setCustomerEmail(request.getCustomerEmail());
-        if (request.getType() != null) key.setType(request.getType());
-        if (request.getMaxActivations() > 0) key.setMaxActivations(request.getMaxActivations());
-        if (request.getValidFrom() != null) key.setValidFrom(request.getValidFrom());
-        if (request.getValidUntil() != null) key.setValidUntil(request.getValidUntil());
-        if (request.getNotes() != null) key.setNotes(request.getNotes());
+        if (request.getMaxActivations() < key.getCurrentActivations()) {
+            throw new IllegalArgumentException("Maximum devices cannot be lower than the number of active devices");
+        }
+        if (request.getType() != com.company.keyvault.model.enums.KeyType.PERPETUAL
+                && request.getValidUntil() == null) {
+            throw new IllegalArgumentException("An expiry date is required for time-limited and trial licenses");
+        }
+        if (request.getValidUntil() != null
+                && !request.getValidUntil().isAfter(request.getValidFrom())) {
+            throw new IllegalArgumentException("Expiry date must be after the valid-from date");
+        }
+
+        key.setCustomerName(normalize(request.getCustomerName()));
+        key.setCustomerEmail(normalize(request.getCustomerEmail()));
+        key.setType(request.getType());
+        key.setMaxActivations(request.getMaxActivations());
+        key.setValidFrom(request.getValidFrom());
+        key.setValidUntil(request.getType() == com.company.keyvault.model.enums.KeyType.PERPETUAL
+                ? null : request.getValidUntil());
+        key.setNotes(normalize(request.getNotes()));
+
+        if (key.getStatus() == KeyStatus.EXPIRED
+                && (key.getValidUntil() == null || key.getValidUntil().isAfter(Instant.now()))) {
+            key.setStatus(KeyStatus.ACTIVE);
+        } else if (key.getStatus() == KeyStatus.ACTIVE
+                && key.getValidUntil() != null && !key.getValidUntil().isAfter(Instant.now())) {
+            key.setStatus(KeyStatus.EXPIRED);
+        }
 
         LicenseKey saved = keyRepository.save(key);
         String productName = productRepository.findById(saved.getProductId())
@@ -217,5 +239,11 @@ public class LicenseKeyService {
         String productName = productRepository.findById(key.getProductId())
                 .map(Product::getName).orElse("Unknown");
         return KeyResponse.from(key, productName);
+    }
+
+    private String normalize(String value) {
+        if (value == null) return null;
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }
