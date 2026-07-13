@@ -219,7 +219,7 @@ public static string GenerateFingerprint()
       {/* Top Welcome Bar */}
       <div className="welcome-banner">
         <div className="welcome-info">
-          <span className="badge badge-primary welcome-pill">KeyVault Pro v1.0</span>
+          <span className="badge badge-primary welcome-pill">360 Bright Media</span>
           <h2>{getGreeting()}, {user?.fullName || 'Avinash'}!</h2>
           <p>Here is your license platform's activity overview.</p>
         </div>
