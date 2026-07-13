@@ -25,6 +25,8 @@ import {
 } from 'react-icons/hi2';
 import './DashboardPage.css';
 
+const SERVER_ENDPOINT = 'https://unitykeyvalidation.onrender.com/api';
+
 export default function DashboardPage() {
   const [stats, setStats] = useState(null);
   const [products, setProducts] = useState([]);
@@ -149,7 +151,7 @@ public class GameLicensing : MonoBehaviour
     void Start()
     {
         // 1. Configure the KeyValidator
-        KeyValidator.Instance.config.serverUrl = "http://localhost:8000/api";
+        KeyValidator.Instance.config.serverUrl = "${SERVER_ENDPOINT}";
         KeyValidator.Instance.config.productCode = "STEELVR-001";
         KeyValidator.Instance.config.heartbeatIntervalSeconds = 300f; // 5 min checks
 
@@ -165,7 +167,7 @@ public class GameLicensing : MonoBehaviour
     }
 }`,
     web: `// Validate license key directly via REST call
-const response = await fetch('http://localhost:8000/api/validate/check', {
+const response = await fetch('${SERVER_ENDPOINT}/validate/check', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -519,6 +521,19 @@ public static string GenerateFingerprint()
                     <li>Select <strong>+ → Add package from tarball</strong>.</li>
                     <li>Choose the downloaded <code>com.keyvault.sdk-1.0.0.tgz</code> file.</li>
                   </ol>
+                  <div className="unity-endpoint">
+                    <div>
+                      <span>Server endpoint</span>
+                      <code>{SERVER_ENDPOINT}</code>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => copyToClipboard(SERVER_ENDPOINT, 'Server endpoint')}
+                    >
+                      <HiOutlineClipboard /> Copy endpoint
+                    </button>
+                  </div>
                 </div>
               )}
               <div className="code-box-header">
