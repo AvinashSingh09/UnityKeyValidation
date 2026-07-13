@@ -716,7 +716,7 @@
 .unity-install-steps {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr;
   gap: var(--space-sm);
   margin: 0;
   padding: var(--space-sm) 0 0 24px;
