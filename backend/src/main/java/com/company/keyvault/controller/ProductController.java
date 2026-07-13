@@ -2,6 +2,8 @@ package com.company.keyvault.controller;
 
 import com.company.keyvault.dto.request.ProductRequest;
 import com.company.keyvault.model.Product;
+import com.company.keyvault.dto.response.ProductOverviewResponse;
+import com.company.keyvault.service.AnalyticsService;
 import com.company.keyvault.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -17,9 +19,11 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    private final AnalyticsService analyticsService;
 
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, AnalyticsService analyticsService) {
         this.productService = productService;
+        this.analyticsService = analyticsService;
     }
 
     @GetMapping
@@ -30,6 +34,11 @@ public class ProductController {
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProduct(@PathVariable String id) {
         return ResponseEntity.ok(productService.getProductById(id));
+    }
+
+    @GetMapping("/{id}/overview")
+    public ResponseEntity<ProductOverviewResponse> getProductOverview(@PathVariable String id) {
+        return ResponseEntity.ok(analyticsService.getProductOverview(id));
     }
 
     @PostMapping

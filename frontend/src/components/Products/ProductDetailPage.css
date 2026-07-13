@@ -1,0 +1,61 @@
+.product-detail-page { max-width: 1580px; margin: 0 auto; }
+.product-detail-back { display: inline-flex; align-items: center; gap: 7px; margin-bottom: var(--space-md); color: var(--text-secondary); font-size: 12px; font-weight: 600; }
+.product-detail-hero { display: flex; align-items: center; justify-content: space-between; gap: var(--space-lg); padding: 22px 24px; }
+.product-detail-identity { display: flex; align-items: center; gap: 15px; min-width: 0; }
+.product-detail-icon { display: grid; place-items: center; width: 52px; height: 52px; flex: 0 0 auto; border-radius: 14px; background: linear-gradient(135deg, var(--primary-glow), rgba(14,165,233,.18)); color: var(--primary); font-size: 25px; }
+.product-detail-title, .product-detail-code { display: flex; align-items: center; gap: 9px; }
+.product-detail-title h1 { font-size: 1.5rem; line-height: 1.25; }
+.product-detail-code { margin: 3px 0; color: var(--primary); font-size: 12px; }
+.product-detail-identity p { max-width: 720px; color: var(--text-secondary); font-size: 12px; }
+.product-overview-metrics { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: var(--space-md); margin: var(--space-md) 0; }
+.product-overview-metric { display: flex; align-items: center; gap: 12px; padding: 17px 18px; }
+.product-overview-metric > span { display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 auto; border-radius: 10px; background: var(--primary-glow); color: var(--primary); font-size: 19px; }
+.product-overview-metric > span.metric-info { background: var(--info-bg); color: var(--info); }
+.product-overview-metric > span.metric-success { background: var(--success-bg); color: var(--success); }
+.product-overview-metric > span.metric-warning { background: var(--warning-bg); color: var(--warning); }
+.product-overview-metric div { display: flex; min-width: 0; flex-direction: column; }
+.product-overview-metric small { color: var(--text-tertiary); font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+.product-overview-metric strong { font-size: 20px; line-height: 1.35; }
+.product-overview-metric p { overflow: hidden; color: var(--text-secondary); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.product-detail-grid { display: grid; grid-template-columns: minmax(0,1.7fr) minmax(300px,.7fr); gap: var(--space-md); }
+.product-detail-panel { padding: 0; overflow: hidden; }
+.product-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); padding: 18px 20px; border-bottom: 1px solid var(--border); }
+.product-panel-heading h2 { font-size: 15px; }
+.product-panel-heading p { color: var(--text-tertiary); font-size: 10px; }
+.product-panel-heading > a { font-size: 10px; font-weight: 700; }
+.product-panel-heading > svg { color: var(--text-tertiary); font-size: 20px; }
+.product-license-panel .table-wrapper, .product-activity-panel .table-wrapper { border: 0; border-radius: 0; }
+.product-license-panel code { color: var(--primary); font-size: 10px; }
+.product-license-panel td:last-child { display: flex; flex-direction: column; }
+.product-license-panel td:last-child small { color: var(--text-tertiary); font-size: 9px; }
+.clickable-product-row { cursor: pointer; }
+.clickable-product-row:hover td { background: var(--primary-glow) !important; }
+.product-info-panel dl { padding: 7px 20px; }
+.product-info-panel dl div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-light); }
+.product-info-panel dt { color: var(--text-tertiary); font-size: 10px; }
+.product-info-panel dd { max-width: 190px; overflow: hidden; color: var(--text-primary); font-size: 10px; font-weight: 600; text-align: right; text-overflow: ellipsis; white-space: nowrap; }
+.product-info-panel code { font-size: 9px; }
+.license-status-block { margin: 6px 20px 20px; padding: 13px; border-radius: 10px; background: var(--bg-tertiary); }
+.license-status-block > span { color: var(--text-tertiary); font-size: 9px; font-weight: 700; text-transform: uppercase; }
+.license-status-block > p { margin-top: 5px; color: var(--text-tertiary); font-size: 10px; }
+.license-status-bar { display: flex; height: 7px; overflow: hidden; margin: 10px 0; border-radius: 999px; background: var(--border); }
+.license-status-bar i.active,.license-status-legend i.active { background: var(--success); }
+.license-status-bar i.suspended,.license-status-legend i.suspended { background: var(--info); }
+.license-status-bar i.expired,.license-status-legend i.expired { background: var(--warning); }
+.license-status-bar i.revoked,.license-status-legend i.revoked { background: var(--danger); }
+.license-status-legend { display: flex; flex-wrap: wrap; gap: 8px 12px; }
+.license-status-legend span { display: flex; align-items: center; gap: 4px; color: var(--text-secondary); font-size: 8px; }
+.license-status-legend i { width: 6px; height: 6px; border-radius: 50%; }
+.license-status-legend b { color: var(--text-primary); }
+.product-activity-panel { margin-top: var(--space-md); }
+.product-activity-location { display: flex; min-width: 150px; flex-direction: column; }
+.product-activity-location span { display: flex; align-items: center; gap: 3px; font-size: 10px; }
+.product-activity-location code { color: var(--text-tertiary); font-size: 9px; }
+.product-hardware-id { display: block; max-width: 180px; overflow: hidden; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.product-detail-empty { display: flex; min-height: 230px; align-items: center; justify-content: center; flex-direction: column; color: var(--text-tertiary); }
+.product-detail-empty.compact { min-height: 110px; }
+.product-detail-empty svg { margin-bottom: 8px; font-size: 30px; }
+.product-detail-empty strong { color: var(--text-secondary); font-size: 12px; }
+.product-detail-empty span { font-size: 10px; }
+@media (max-width:1100px){.product-overview-metrics{grid-template-columns:1fr 1fr}.product-detail-grid{grid-template-columns:1fr}}
+@media (max-width:650px){.product-detail-hero{align-items:flex-start;flex-direction:column}.product-detail-actions,.product-detail-actions a{width:100%}.product-overview-metrics{grid-template-columns:1fr}.product-detail-title{align-items:flex-start;flex-direction:column}.product-detail-icon{width:44px;height:44px}}

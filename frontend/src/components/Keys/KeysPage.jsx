@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getKeys, createKey, batchCreateKeys, revokeKey, suspendKey, reactivateKey, deleteKey } from '../../api/keyApi';
 import { getProducts } from '../../api/productApi';
 import { useAuth } from '../../context/AuthContext';
@@ -16,7 +17,6 @@ import {
   HiOutlineSquare3Stack3D,
   HiOutlineEye,
   HiOutlineMapPin,
-  HiOutlineComputerDesktop,
 } from 'react-icons/hi2';
 import './Keys.css';
 
@@ -26,11 +26,12 @@ export default function KeysPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [filterProduct, setFilterProduct] = useState('');
+  const [searchParams] = useSearchParams();
+  const [filterProduct, setFilterProduct] = useState(() => searchParams.get('productId') || '');
   const [filterStatus, setFilterStatus] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showBatchModal, setShowBatchModal] = useState(false);
-  const [showDetailModal, setShowDetailModal] = useState(null);
+  const navigate = useNavigate();
   const { isAdmin, isSuperAdmin } = useAuth();
 
   const [createForm, setCreateForm] = useState({
@@ -267,7 +268,7 @@ export default function KeysPage() {
                     </td>
                     <td>
                       <div className="flex gap-sm">
-                        <button onClick={() => setShowDetailModal(key)} className="btn btn-ghost btn-icon btn-sm" title="View devices and location">
+                        <button onClick={() => navigate(`/keys/${key.id}`)} className="btn btn-ghost btn-icon btn-sm" title="Open license details">
                           <HiOutlineEye />
                         </button>
                         {isAdmin() && key.status === 'ACTIVE' && (
@@ -305,49 +306,6 @@ export default function KeysPage() {
             <button onClick={() => setPage(p => p + 1)} disabled={page >= totalPages - 1}>Next</button>
           </div>
         </>
-      )}
-
-      {/* Activation details */}
-      {showDetailModal && (
-        <div className="modal-overlay" onClick={() => setShowDetailModal(null)}>
-          <div className="modal modal-large activation-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <div>
-                <h2>Activated Devices</h2>
-                <span className="mono activation-modal-key">{showDetailModal.key}</span>
-              </div>
-              <button onClick={() => setShowDetailModal(null)} className="btn btn-ghost btn-icon">×</button>
-            </div>
-            {!showDetailModal.activations?.length ? (
-              <div className="empty-panel">This key has not been activated on a device.</div>
-            ) : (
-              <div className="activation-list">
-                {[...showDetailModal.activations]
-                  .sort((a, b) => new Date(b.lastValidatedAt || b.activatedAt) - new Date(a.lastValidatedAt || a.activatedAt))
-                  .map((activation) => (
-                    <article className="activation-device" key={activation.hardwareId}>
-                      <div className="activation-device-icon"><HiOutlineComputerDesktop /></div>
-                      <div className="activation-device-main">
-                        <div className="activation-device-heading">
-                          <strong>{activation.machineName || 'Unnamed device'}</strong>
-                          <span className="badge badge-active">Active seat</span>
-                        </div>
-                        <div className="activation-location"><HiOutlineMapPin /> {locationLabel(activation)}</div>
-                        <div className="activation-facts">
-                          <span><small>Public IP address</small><code>{displayIp(activation)}</code></span>
-                          <span><small>Last active</small><strong>{formatDateTime(activation.lastValidatedAt || activation.activatedAt)}</strong></span>
-                          <span><small>First activated</small><strong>{formatDateTime(activation.activatedAt)}</strong></span>
-                          <span><small>ISP</small><strong>{activation.location?.isp || 'Unavailable'}</strong></span>
-                        </div>
-                        <div className="hardware-id"><small>Hardware ID</small><code>{activation.hardwareId}</code></div>
-                      </div>
-                    </article>
-                  ))}
-              </div>
-            )}
-            <p className="geo-privacy-note">Location is an approximate Geo-IP result and may represent a VPN or ISP gateway.</p>
-          </div>
-        </div>
       )}
 
       {/* Create Key Modal */}

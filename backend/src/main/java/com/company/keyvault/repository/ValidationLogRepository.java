@@ -16,7 +16,12 @@ public interface ValidationLogRepository extends MongoRepository<ValidationLog, 
 
     Page<ValidationLog> findAllByOrderByTimestampDesc(Pageable pageable);
 
+    Page<ValidationLog> findByProductCodeOrderByTimestampDesc(String productCode, Pageable pageable);
+
     List<ValidationLog> findByTimestampBetween(Instant start, Instant end);
+
+    List<ValidationLog> findByProductCodeAndTimestampBetween(
+            String productCode, Instant start, Instant end);
 
     long countByResultAndTimestampBetween(com.company.keyvault.model.enums.ValidationResult result, Instant start, Instant end);
 }

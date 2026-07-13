@@ -1,6 +1,7 @@
 package com.company.keyvault.controller;
 
 import com.company.keyvault.dto.request.BatchKeyRequest;
+import com.company.keyvault.dto.request.DeviceUpdateRequest;
 import com.company.keyvault.dto.request.KeyCreateRequest;
 import com.company.keyvault.dto.response.KeyResponse;
 import com.company.keyvault.dto.response.MessageResponse;
@@ -93,6 +94,23 @@ public class LicenseKeyController {
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<KeyResponse> reactivateKey(@PathVariable String id) {
         return ResponseEntity.ok(keyService.reactivateKey(id));
+    }
+
+    @PutMapping("/{id}/devices/{hardwareId}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
+    public ResponseEntity<KeyResponse> updateDevice(
+            @PathVariable String id,
+            @PathVariable String hardwareId,
+            @Valid @RequestBody DeviceUpdateRequest request) {
+        return ResponseEntity.ok(keyService.updateDevice(id, hardwareId, request));
+    }
+
+    @DeleteMapping("/{id}/devices/{hardwareId}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
+    public ResponseEntity<KeyResponse> removeDevice(
+            @PathVariable String id,
+            @PathVariable String hardwareId) {
+        return ResponseEntity.ok(keyService.removeDevice(id, hardwareId));
     }
 
     @DeleteMapping("/{id}")

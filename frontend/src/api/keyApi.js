@@ -26,3 +26,9 @@ export const reactivateKey = (id) =>
 
 export const deleteKey = (id) =>
   axiosClient.delete(`/keys/${id}`);
+
+export const updateDevice = (keyId, hardwareId, data) =>
+  axiosClient.put(`/keys/${keyId}/devices/${encodeURIComponent(hardwareId)}`, data);
+
+export const removeDevice = (keyId, hardwareId) =>
+  axiosClient.delete(`/keys/${keyId}/devices/${encodeURIComponent(hardwareId)}`);

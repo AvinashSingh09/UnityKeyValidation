@@ -1,9 +1,11 @@
 package com.company.keyvault.service;
 
 import com.company.keyvault.dto.request.BatchKeyRequest;
+import com.company.keyvault.dto.request.DeviceUpdateRequest;
 import com.company.keyvault.dto.request.KeyCreateRequest;
 import com.company.keyvault.dto.response.KeyResponse;
 import com.company.keyvault.exception.ResourceNotFoundException;
+import com.company.keyvault.model.Activation;
 import com.company.keyvault.model.LicenseKey;
 import com.company.keyvault.model.Product;
 import com.company.keyvault.model.enums.KeyStatus;
@@ -159,6 +161,29 @@ public class LicenseKeyService {
         keyRepository.deleteById(id);
     }
 
+    public KeyResponse updateDevice(String id, String hardwareId, DeviceUpdateRequest request) {
+        LicenseKey key = getLicenseKey(id);
+        Activation activation = findActivation(key, hardwareId);
+
+        if (request.getMachineName() != null) {
+            String machineName = request.getMachineName().trim();
+            activation.setMachineName(machineName.isEmpty() ? null : machineName);
+        }
+        if (request.getTrusted() != null) {
+            activation.setTrusted(request.getTrusted());
+        }
+
+        return toResponse(keyRepository.save(key));
+    }
+
+    public KeyResponse removeDevice(String id, String hardwareId) {
+        LicenseKey key = getLicenseKey(id);
+        findActivation(key, hardwareId);
+        key.getActivations().removeIf(activation -> hardwareId.equals(activation.getHardwareId()));
+        key.setCurrentActivations(key.getActivations().size());
+        return toResponse(keyRepository.save(key));
+    }
+
     private KeyResponse updateKeyStatus(String id, KeyStatus status) {
         LicenseKey key = keyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -168,5 +193,29 @@ public class LicenseKeyService {
         String productName = productRepository.findById(saved.getProductId())
                 .map(Product::getName).orElse("Unknown");
         return KeyResponse.from(saved, productName);
+    }
+
+    private LicenseKey getLicenseKey(String id) {
+        LicenseKey key = keyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "License key not found with id: " + id));
+        if (key.getActivations() == null) {
+            key.setActivations(new ArrayList<>());
+        }
+        return key;
+    }
+
+    private Activation findActivation(LicenseKey key, String hardwareId) {
+        return key.getActivations().stream()
+                .filter(activation -> hardwareId.equals(activation.getHardwareId()))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Device not found for this license key"));
+    }
+
+    private KeyResponse toResponse(LicenseKey key) {
+        String productName = productRepository.findById(key.getProductId())
+                .map(Product::getName).orElse("Unknown");
+        return KeyResponse.from(key, productName);
     }
 }

@@ -6,6 +6,9 @@ export const getProducts = () =>
 export const getProduct = (id) =>
   axiosClient.get(`/products/${id}`);
 
+export const getProductOverview = (id) =>
+  axiosClient.get(`/products/${id}/overview`);
+
 export const createProduct = (data) =>
   axiosClient.post('/products', data);
 

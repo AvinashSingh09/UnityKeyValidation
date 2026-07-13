@@ -20,6 +20,8 @@ public interface LicenseKeyRepository extends MongoRepository<LicenseKey, String
 
     Page<LicenseKey> findByProductId(String productId, Pageable pageable);
 
+    List<LicenseKey> findByProductId(String productId);
+
     Page<LicenseKey> findByStatus(KeyStatus status, Pageable pageable);
 
     Page<LicenseKey> findByProductIdAndStatus(String productId, KeyStatus status, Pageable pageable);

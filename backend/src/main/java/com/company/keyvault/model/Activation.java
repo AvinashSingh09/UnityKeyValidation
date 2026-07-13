@@ -18,5 +18,7 @@ public class Activation {
     private Instant lastValidatedAt;
     private String ipAddress;
     private String machineName;
+    @Builder.Default
+    private boolean trusted = false;
     private GeoLocation location;
 }

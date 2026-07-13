@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getProducts, createProduct, updateProduct, deleteProduct } from '../../api/productApi';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -6,6 +7,7 @@ import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineCube } from 'r
 import './Products.css';
 
 export default function ProductsPage() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -98,19 +100,21 @@ export default function ProductsPage() {
       ) : (
         <div className="products-grid">
           {products.map((product) => (
-            <div key={product.id} className="card product-card">
+            <div key={product.id} className="card product-card" role="link" tabIndex={0}
+              onClick={() => navigate(`/products/${product.id}`)}
+              onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') navigate(`/products/${product.id}`); }}>
               <div className="product-card-header">
                 <div className="product-icon">
                   <HiOutlineCube />
                 </div>
                 <div className="product-actions">
                   {isAdmin() && (
-                    <button onClick={() => openEdit(product)} className="btn btn-ghost btn-icon btn-sm">
+                    <button onKeyDown={(event) => event.stopPropagation()} onClick={(event) => { event.stopPropagation(); openEdit(product); }} className="btn btn-ghost btn-icon btn-sm" title="Edit product">
                       <HiOutlinePencil />
                     </button>
                   )}
                   {isSuperAdmin() && (
-                    <button onClick={() => handleDelete(product.id)} className="btn btn-ghost btn-icon btn-sm">
+                    <button onKeyDown={(event) => event.stopPropagation()} onClick={(event) => { event.stopPropagation(); handleDelete(product.id); }} className="btn btn-ghost btn-icon btn-sm" title="Deactivate product">
                       <HiOutlineTrash />
                     </button>
                   )}

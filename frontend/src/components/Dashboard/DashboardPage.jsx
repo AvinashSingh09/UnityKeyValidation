@@ -5,25 +5,13 @@ import { getKeys, createKey } from '../../api/keyApi';
 import { useAuth } from '../../context/AuthContext';
 import { formatDate } from '../../utils/dateUtils';
 import toast from 'react-hot-toast';
-import {
-  ResponsiveContainer,
-  ScatterChart,
-  Scatter,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  ZAxis,
-  Tooltip,
-} from 'recharts';
+import GeoMap from './GeoMap';
 import {
   HiOutlineKey,
   HiOutlineCheckCircle,
   HiOutlineClock,
-  HiOutlineXCircle,
   HiOutlineCube,
   HiOutlineShieldCheck,
-  HiOutlineExclamationTriangle,
-  HiOutlinePauseCircle,
   HiOutlineBookOpen,
   HiOutlineCommandLine,
   HiOutlineClipboard,
@@ -51,7 +39,6 @@ export default function DashboardPage() {
   // Modals / Overlays
   const [activeGuideTab, setActiveGuideTab] = useState('unity');
   const [showGuideModal, setShowGuideModal] = useState(false);
-  const [copiedText, setCopiedText] = useState('');
 
   // Quick modals for inline creation
   const [showProductModal, setShowProductModal] = useState(false);
@@ -69,7 +56,7 @@ export default function DashboardPage() {
     setLoading(true);
     try {
       await Promise.all([fetchStats(), fetchRecentProducts(), fetchRecentKeys(), fetchGeography()]);
-    } catch (err) {
+    } catch {
       console.error(err);
     } finally {
       setLoading(false);
@@ -81,7 +68,7 @@ export default function DashboardPage() {
     try {
       await Promise.all([fetchStats(), fetchRecentProducts(), fetchRecentKeys(), fetchGeography()]);
       toast.success('Dashboard data refreshed');
-    } catch (err) {
+    } catch {
       toast.error('Failed to refresh data');
     } finally {
       setRefreshing(false);
@@ -106,20 +93,6 @@ export default function DashboardPage() {
   const fetchGeography = async () => {
     const { data } = await getGeography();
     setGeography(data);
-  };
-
-  const GeoTooltip = ({ active, payload }) => {
-    if (!active || !payload?.length) return null;
-    const point = payload[0].payload;
-    const place = [point.city, point.region, point.country].filter(Boolean).join(', ');
-    return (
-      <div className="geo-tooltip">
-        <strong>{place || 'Unknown location'}</strong>
-        <span>{point.productName} · {point.customerName || 'Unassigned key'}</span>
-        <span className="mono">{point.ipAddress}</span>
-        <span>{formatDate(point.lastSeenAt)}</span>
-      </div>
-    );
   };
 
   const handleCreateProduct = async (e) => {
@@ -156,9 +129,7 @@ export default function DashboardPage() {
 
   const copyToClipboard = (text, type = 'Key') => {
     navigator.clipboard.writeText(text);
-    setCopiedText(text);
     toast.success(`${type} copied to clipboard`);
-    setTimeout(() => setCopiedText(''), 2000);
   };
 
   const getGreeting = () => {
@@ -410,8 +381,8 @@ public static string GenerateFingerprint()
             </div>
           </div>
           <div className="geo-totals">
-            <span><strong>{geography?.locatedDevices || 0}</strong> located devices</span>
-            <span><strong>{geography?.countries || 0}</strong> countries</span>
+            <span><strong>{geography?.locatedDevices || 0}</strong>Located devices</span>
+            <span><strong>{geography?.countries || 0}</strong>Countries</span>
           </div>
         </div>
 
@@ -425,45 +396,49 @@ public static string GenerateFingerprint()
           </div>
         ) : (
           <div className="geo-grid">
-            <div className="geo-chart" aria-label="World coordinate plot of active devices">
-              <ResponsiveContainer width="100%" height={330}>
-                <ScatterChart margin={{ top: 18, right: 18, bottom: 8, left: 0 }}>
-                  <defs>
-                    <radialGradient id="geoDot" cx="50%" cy="50%" r="50%">
-                      <stop offset="0%" stopColor="#a5b4fc" stopOpacity={1} />
-                      <stop offset="100%" stopColor="#6366f1" stopOpacity={0.55} />
-                    </radialGradient>
-                  </defs>
-                  <CartesianGrid stroke="rgba(148, 163, 184, 0.12)" strokeDasharray="3 6" />
-                  <XAxis type="number" dataKey="longitude" domain={[-180, 180]} ticks={[-180, -120, -60, 0, 60, 120, 180]} tickFormatter={(v) => `${Math.abs(v)}°${v < 0 ? 'W' : v > 0 ? 'E' : ''}`} tick={{ fill: '#778096', fontSize: 10 }} axisLine={false} tickLine={false} />
-                  <YAxis type="number" dataKey="latitude" domain={[-90, 90]} ticks={[-90, -60, -30, 0, 30, 60, 90]} tickFormatter={(v) => `${Math.abs(v)}°${v < 0 ? 'S' : v > 0 ? 'N' : ''}`} tick={{ fill: '#778096', fontSize: 10 }} axisLine={false} tickLine={false} width={38} />
-                  <ZAxis range={[90, 90]} />
-                  <Tooltip content={<GeoTooltip />} cursor={{ strokeDasharray: '3 3' }} />
-                  <Scatter data={geography.locations} fill="url(#geoDot)" />
-                </ScatterChart>
-              </ResponsiveContainer>
+            <div className="geo-chart">
+              <div className="geo-map-badge">
+                <span className="geo-live-dot" /> Live installation map
+              </div>
+              <GeoMap locations={geography.locations} />
             </div>
 
-            <div className="geo-side-list">
-              <h4>Top countries</h4>
+            <aside className="geo-side-list">
+              <div className="geo-list-section">
+                <div className="geo-list-heading">
+                  <h4>Top countries</h4>
+                  <span>Devices</span>
+                </div>
               {(geography.countrySummary || []).slice(0, 6).map((country) => (
                 <div className="country-row" key={country.countryCode}>
                   <span className="country-code">{country.countryCode}</span>
-                  <span className="country-name">{country.country}</span>
+                  <div className="country-detail">
+                    <span className="country-name">{country.country}</span>
+                    <span className="country-progress"><i style={{ width: `${Math.max(12, (country.devices / geography.locatedDevices) * 100)}%` }} /></span>
+                  </div>
                   <strong>{country.devices}</strong>
                 </div>
               ))}
-              <h4 className="recent-title">Recently active</h4>
+              </div>
+
+              <div className="geo-list-section recent-section">
+                <div className="geo-list-heading">
+                  <h4>Recently active</h4>
+                  <span>Last seen</span>
+                </div>
               {(geography.locations || []).slice(0, 4).map((point) => (
                 <div className="recent-location" key={`${point.keyId}-${point.hardwareId}`}>
-                  <HiOutlineMapPin />
+                  <span className="recent-pin"><HiOutlineMapPin /></span>
                   <div>
                     <strong>{[point.city, point.country].filter(Boolean).join(', ')}</strong>
-                    <span>{point.productName} · <span className="mono">{point.ipAddress}</span></span>
+                    <span>{point.productName}</span>
+                    <code>{point.ipAddress}</code>
                   </div>
+                  <time>{formatDate(point.lastSeenAt)}</time>
                 </div>
               ))}
-            </div>
+              </div>
+            </aside>
           </div>
         )}
         <p className="geo-accuracy-note">Geo-IP locations are approximate and may reflect a VPN, carrier, or ISP gateway.</p>
