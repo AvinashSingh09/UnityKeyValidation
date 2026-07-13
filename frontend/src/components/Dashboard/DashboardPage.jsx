@@ -18,6 +18,7 @@ import {
   HiOutlineMagnifyingGlass,
   HiOutlinePlus,
   HiOutlineArrowTopRightOnSquare,
+  HiOutlineArrowDownTray,
   HiOutlineArrowPath,
   HiOutlineMapPin,
   HiOutlineGlobeAlt,
@@ -220,7 +221,7 @@ public static string GenerateFingerprint()
         <div className="welcome-info">
           <span className="badge badge-primary welcome-pill">KeyVault Pro v1.0</span>
           <h2>{getGreeting()}, {user?.fullName || 'Avinash'}!</h2>
-          <p>Here is your license platform's activity overview. Connected to database cluster.</p>
+          <p>Here is your license platform's activity overview.</p>
         </div>
         <div className="welcome-actions">
           <button onClick={handleRefresh} disabled={refreshing} className="btn btn-secondary btn-icon" title="Refresh metrics">
@@ -409,16 +410,16 @@ public static string GenerateFingerprint()
                   <h4>Top countries</h4>
                   <span>Devices</span>
                 </div>
-              {(geography.countrySummary || []).slice(0, 6).map((country) => (
-                <div className="country-row" key={country.countryCode}>
-                  <span className="country-code">{country.countryCode}</span>
-                  <div className="country-detail">
-                    <span className="country-name">{country.country}</span>
-                    <span className="country-progress"><i style={{ width: `${Math.max(12, (country.devices / geography.locatedDevices) * 100)}%` }} /></span>
+                {(geography.countrySummary || []).slice(0, 6).map((country) => (
+                  <div className="country-row" key={country.countryCode}>
+                    <span className="country-code">{country.countryCode}</span>
+                    <div className="country-detail">
+                      <span className="country-name">{country.country}</span>
+                      <span className="country-progress"><i style={{ width: `${Math.max(12, (country.devices / geography.locatedDevices) * 100)}%` }} /></span>
+                    </div>
+                    <strong>{country.devices}</strong>
                   </div>
-                  <strong>{country.devices}</strong>
-                </div>
-              ))}
+                ))}
               </div>
 
               <div className="geo-list-section recent-section">
@@ -426,17 +427,17 @@ public static string GenerateFingerprint()
                   <h4>Recently active</h4>
                   <span>Last seen</span>
                 </div>
-              {(geography.locations || []).slice(0, 4).map((point) => (
-                <div className="recent-location" key={`${point.keyId}-${point.hardwareId}`}>
-                  <span className="recent-pin"><HiOutlineMapPin /></span>
-                  <div>
-                    <strong>{[point.city, point.country].filter(Boolean).join(', ')}</strong>
-                    <span>{point.productName}</span>
-                    <code>{point.ipAddress}</code>
+                {(geography.locations || []).slice(0, 4).map((point) => (
+                  <div className="recent-location" key={`${point.keyId}-${point.hardwareId}`}>
+                    <span className="recent-pin"><HiOutlineMapPin /></span>
+                    <div>
+                      <strong>{[point.city, point.country].filter(Boolean).join(', ')}</strong>
+                      <span>{point.productName}</span>
+                      <code>{point.ipAddress}</code>
+                    </div>
+                    <time>{formatDate(point.lastSeenAt)}</time>
                   </div>
-                  <time>{formatDate(point.lastSeenAt)}</time>
-                </div>
-              ))}
+                ))}
               </div>
             </aside>
           </div>
@@ -484,7 +485,7 @@ public static string GenerateFingerprint()
               <h2><HiOutlineBookOpen /> Integration Guide</h2>
               <button onClick={() => setShowGuideModal(false)} className="btn btn-ghost btn-icon">✕</button>
             </div>
-            
+
             <div className="guide-tabs">
               <button onClick={() => setActiveGuideTab('unity')} className={`tab-btn ${activeGuideTab === 'unity' ? 'active' : ''}`}>Unity Component</button>
               <button onClick={() => setActiveGuideTab('web')} className={`tab-btn ${activeGuideTab === 'web' ? 'active' : ''}`}>Web API Endpoints</button>
@@ -492,6 +493,34 @@ public static string GenerateFingerprint()
             </div>
 
             <div className="guide-content mt-md">
+              {activeGuideTab === 'unity' && (
+                <div className="unity-package-panel">
+                  <div className="unity-package-details">
+                    <div className="unity-package-icon">
+                      <HiOutlineCube />
+                    </div>
+                    <div>
+                      <div className="unity-package-heading">
+                        <h3>KeyVault SDK for Unity</h3>
+                        <span className="badge badge-primary">v1.0.0</span>
+                      </div>
+                      <p>Download the ready-to-install Unity Package Manager archive.</p>
+                    </div>
+                  </div>
+                  <a
+                    className="btn btn-primary unity-package-download"
+                    href="/com.keyvault.sdk-1.0.0.tgz"
+                    download="com.keyvault.sdk-1.0.0.tgz"
+                  >
+                    <HiOutlineArrowDownTray /> Download package
+                  </a>
+                  <ol className="unity-install-steps">
+                    <li>Open <strong>Window → Package Manager</strong> in Unity.</li>
+                    <li>Select <strong>+ → Add package from tarball</strong>.</li>
+                    <li>Choose the downloaded <code>com.keyvault.sdk-1.0.0.tgz</code> file.</li>
+                  </ol>
+                </div>
+              )}
               <div className="code-box-header">
                 <span className="mono">Code Snippet</span>
                 <button className="btn btn-ghost btn-sm" onClick={() => copyToClipboard(codeSnippets[activeGuideTab], 'Code')}>
@@ -502,7 +531,7 @@ public static string GenerateFingerprint()
                 <code>{codeSnippets[activeGuideTab]}</code>
               </pre>
             </div>
-            
+
             <div className="modal-footer">
               <button onClick={() => setShowGuideModal(false)} className="btn btn-primary">Done</button>
             </div>
@@ -527,7 +556,7 @@ public static string GenerateFingerprint()
                   placeholder="e.g. Virtual Classroom Simulator"
                   className="input"
                   value={newProductForm.name}
-                  onChange={(e) => setNewProductForm({...newProductForm, name: e.target.value})}
+                  onChange={(e) => setNewProductForm({ ...newProductForm, name: e.target.value })}
                 />
               </div>
               <div className="input-group mt-md">
@@ -538,7 +567,7 @@ public static string GenerateFingerprint()
                   placeholder="e.g. VCLASS-VR-01"
                   className="input mono"
                   value={newProductForm.productCode}
-                  onChange={(e) => setNewProductForm({...newProductForm, productCode: e.target.value.toUpperCase()})}
+                  onChange={(e) => setNewProductForm({ ...newProductForm, productCode: e.target.value.toUpperCase() })}
                 />
               </div>
               <div className="input-group mt-md">
@@ -548,7 +577,7 @@ public static string GenerateFingerprint()
                   placeholder="1.0.0"
                   className="input"
                   value={newProductForm.version}
-                  onChange={(e) => setNewProductForm({...newProductForm, version: e.target.value})}
+                  onChange={(e) => setNewProductForm({ ...newProductForm, version: e.target.value })}
                 />
               </div>
               <div className="input-group mt-md">
@@ -558,7 +587,7 @@ public static string GenerateFingerprint()
                   placeholder="Enter details..."
                   className="input"
                   value={newProductForm.description}
-                  onChange={(e) => setNewProductForm({...newProductForm, description: e.target.value})}
+                  onChange={(e) => setNewProductForm({ ...newProductForm, description: e.target.value })}
                 />
               </div>
               <div className="modal-footer">
@@ -585,7 +614,7 @@ public static string GenerateFingerprint()
                   required
                   className="select"
                   value={newKeyForm.productId}
-                  onChange={(e) => setNewKeyForm({...newKeyForm, productId: e.target.value})}
+                  onChange={(e) => setNewKeyForm({ ...newKeyForm, productId: e.target.value })}
                 >
                   <option value="">Select product...</option>
                   {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -598,7 +627,7 @@ public static string GenerateFingerprint()
                   placeholder="Customer organization / name"
                   className="input"
                   value={newKeyForm.customerName}
-                  onChange={(e) => setNewKeyForm({...newKeyForm, customerName: e.target.value})}
+                  onChange={(e) => setNewKeyForm({ ...newKeyForm, customerName: e.target.value })}
                 />
               </div>
               <div className="input-group mt-md">
@@ -608,7 +637,7 @@ public static string GenerateFingerprint()
                   placeholder="name@customer.com"
                   className="input"
                   value={newKeyForm.customerEmail}
-                  onChange={(e) => setNewKeyForm({...newKeyForm, customerEmail: e.target.value})}
+                  onChange={(e) => setNewKeyForm({ ...newKeyForm, customerEmail: e.target.value })}
                 />
               </div>
               <div className="form-row mt-md">
@@ -617,7 +646,7 @@ public static string GenerateFingerprint()
                   <select
                     className="select"
                     value={newKeyForm.type}
-                    onChange={(e) => setNewKeyForm({...newKeyForm, type: e.target.value})}
+                    onChange={(e) => setNewKeyForm({ ...newKeyForm, type: e.target.value })}
                   >
                     <option value="TIME_LIMITED">Time Limited</option>
                     <option value="PERPETUAL">Perpetual</option>
@@ -631,7 +660,7 @@ public static string GenerateFingerprint()
                     min="1"
                     className="input"
                     value={newKeyForm.maxActivations}
-                    onChange={(e) => setNewKeyForm({...newKeyForm, maxActivations: parseInt(e.target.value) || 1})}
+                    onChange={(e) => setNewKeyForm({ ...newKeyForm, maxActivations: parseInt(e.target.value) || 1 })}
                   />
                 </div>
               </div>
@@ -641,7 +670,7 @@ public static string GenerateFingerprint()
                   type="datetime-local"
                   className="input"
                   value={newKeyForm.validUntil}
-                  onChange={(e) => setNewKeyForm({...newKeyForm, validUntil: e.target.value})}
+                  onChange={(e) => setNewKeyForm({ ...newKeyForm, validUntil: e.target.value })}
                 />
               </div>
               <div className="modal-footer">

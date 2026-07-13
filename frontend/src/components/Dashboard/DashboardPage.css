@@ -658,6 +658,79 @@
   border-bottom-color: var(--primary-light);
 }
 
+.unity-package-panel {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-md);
+  padding: var(--space-md);
+  background: linear-gradient(135deg, var(--primary-glow), var(--bg-secondary));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.unity-package-details {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+.unity-package-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--primary-light);
+  font-size: 23px;
+  box-shadow: var(--shadow-sm);
+}
+
+.unity-package-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.unity-package-heading h3 {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+}
+
+.unity-package-details p {
+  margin-top: 3px;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-xs);
+}
+
+.unity-package-download {
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.unity-install-steps {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+  margin: 0;
+  padding: var(--space-sm) 0 0 24px;
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+}
+
+.unity-install-steps code {
+  overflow-wrap: anywhere;
+  color: var(--primary-light);
+}
+
 .code-box-header {
   display: flex;
   justify-content: space-between;
@@ -723,4 +796,7 @@
 
   .geo-header { align-items: flex-start; flex-direction: column; }
   .geo-totals span { align-items: flex-start; }
+  .unity-package-panel { grid-template-columns: 1fr; }
+  .unity-package-download { width: 100%; justify-content: center; }
+  .unity-install-steps { grid-template-columns: 1fr; }
 }
