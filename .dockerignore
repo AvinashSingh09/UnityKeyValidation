@@ -1,0 +1,19 @@
+.git
+.agents
+.codex
+
+# Local secrets and generated backend output
+**/.env
+**/.env.*
+backend/target
+
+# The backend image does not need frontend or Unity sources
+frontend
+unity-sdk
+
+# Editor and OS files
+.idea
+.vscode
+.DS_Store
+Thumbs.db
+*.log

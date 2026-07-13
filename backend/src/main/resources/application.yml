@@ -1,5 +1,6 @@
 server:
-  port: 8000
+  # Render supplies PORT (normally 10000); local development continues to use 8000.
+  port: ${PORT:8000}
 
 spring:
   application:
